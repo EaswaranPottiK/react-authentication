@@ -1,10 +1,8 @@
 import React from 'react'
-import { redirect } from 'react-router-dom'
 
-const LoginSuccessful = () => {
-
+const LoginSuccessful = (props) => {
   return (
-    <div>LoginSuccessful</div>
+    <div>LoginSuccessful, your access tocken is {props.accessToken}</div> 
   )
 }
 

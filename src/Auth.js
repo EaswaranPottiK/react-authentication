@@ -1,28 +1,19 @@
 
 import { auth , googleProvider} from "./firebase";
-import {signInWithPopup,signInWithEmailAndPassword,getAuth} from "firebase/auth";
+import {signInWithPopup,signInWithEmailAndPassword,getAuth,GoogleAuthProvider} from "firebase/auth";
 import { useState } from "react";
-import { Navigate, useNavigate } from 'react-router-dom';
 import './App.css';
 
-export const Auth = () => {
+export const Auth = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [accessToken, setAccessTocken] = useState("")
-
-  let navigate = useNavigate();
   
-
   function signIn(){
   const auth = getAuth();
   signInWithEmailAndPassword(auth, email, password)
   .then((userCredential) => {
-    // Signed in 
-    const user = userCredential.user;
-    setAccessTocken(user.accessToken)
-    
-    navigate("/LoginSuccessful")
-    // ...
+    //login is successful
+    props.setAccessTocken(userCredential._tokenResponse.idToken)
   })
   .catch((error) => {
     const errorCode = error.code;
@@ -32,11 +23,27 @@ export const Auth = () => {
   }
 
   const signInWithGoogle = async () => {
-    try {
-    await signInWithPopup(auth,googleProvider);
-    } catch (err){
-      console.error(err);
-    }
+    const auth = getAuth();
+    signInWithPopup(auth, googleProvider)
+      .then((result) => {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        // The signed-in user info.
+        const user = result.user;
+        props.setAccessTocken(token)
+        // IdP data available using getAdditionalUserInfo(result)
+        // ...
+      }).catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // The email of the user's account used.
+        const email = error.customData.email;
+        // The AuthCredential type that was used.
+        const credential = GoogleAuthProvider.credentialFromError(error);
+        // ...
+      });
   };
 
   return (
